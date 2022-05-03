@@ -10,19 +10,81 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
+
   // Complete aqui
+  const { username } = request.headers;
+
+  const user = users.find((user) => user.username === username);
+
+  if(!user) {
+    return response.status(404).json({ error: 'Mensagem do erro' });
+  }
+
+  request.user = user;
+
+  return next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
+
   // Complete aqui
+  const { user } = request;
+
+  if (user.todos.length >= 10 && user.pro === false) {
+    return response.status(403).json({error: "Pro plan is not activate"})
+  }
+
+  return next();
 }
 
 function checksTodoExists(request, response, next) {
+
   // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  // O id é valido?
+  const idValidated = validate(id);
+
+  if (!idValidated) {
+    return response.status(400).json({error: "invalid ID"});
+  }
+
+  // O usuário existe?
+  const user = users.find((userFinded) => userFinded.username === username);
+
+  if(!user) {
+    return response.status(404).json({ error: 'Mensagem do erro' });
+  }
+
+  // O todo existe no array de todos desse usuário?
+  const todo = user.todos.find((todo) => todo.id === id);
+
+  if(!todo) {
+    return response.status(404).json({ error: 'Mensagem do erro' });
+  }
+
+  request.user = user;
+  request.todo = todo;
+
+  return next();
+
 }
 
 function findUserById(request, response, next) {
+
   // Complete aqui
+  const { id } = request.params;
+
+  const user = users.find((user) => user.id === id);
+
+  if(!user) {
+    return response.status(404).json({ error: 'Mensagem do erro' });
+  }
+
+  request.user = user;
+
+  return next();
 }
 
 app.post('/users', (request, response) => {
